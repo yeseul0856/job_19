@@ -1,29 +1,131 @@
-<html>
-    <head></head>
-    <body>
-        <h1>{{ keyword }} 잡서치 결과 페이지입니다.</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>순번</th>
-                    <th>회사명</th>
-                    <th>공고제목</th>
-                    <th>회사위치</th>
-                    <th>상세보기</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for index, job in jobs %}
-                <tr>
-                    <td>{{ index + 1}}</td>
-                    <td>{{ job["company"] }}</td>
-                    <td>{{ job["title"]}}</td>
-                    <td>{{ job["location"]}}</td>
-                    <td>{{ job["link"]}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f8fc">
+    <title>{{ keyword }} 채용 검색 결과 | 잡서치</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #172b4d;
+            --muted: #68778d;
+            --line: #e3e9f1;
+            --blue: #1769e0;
+            --blue-dark: #0e51b8;
+            --canvas: #f5f8fc;
+            --white: #fff;
+        }
 
-    </body>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--canvas); color: var(--ink); font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; }
+        a { color: inherit; text-decoration: none; }
+        .topline { height: 5px; background: linear-gradient(90deg, var(--blue) 0 72%, #75d7b0 72% 91%, #ff8068 91%); }
+        .site-header { background: rgba(255, 255, 255, .96); border-bottom: 1px solid var(--line); }
+        .header-inner, .page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; }
+        .header-inner { min-height: 76px; display: flex; align-items: center; gap: 38px; }
+        .brand { display: inline-flex; align-items: center; gap: 10px; flex: 0 0 auto; font-size: 21px; font-weight: 850; }
+        .brand-mark { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 10px; background: var(--blue); color: #fff; font-size: 17px; font-weight: 800; }
+        .search-form { display: flex; flex: 1; max-width: 680px; gap: 8px; padding: 5px; border: 1px solid #d9e1ec; border-radius: 10px; background: var(--white); }
+        .search-form:focus-within { border-color: #91b7ed; box-shadow: 0 0 0 3px rgba(23, 105, 224, .1); }
+        input[type="search"] { min-width: 0; height: 40px; flex: 1; padding: 0 11px; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 15px; }
+        input[type="search"]::placeholder { color: #98a3b3; }
+        .search-button { min-width: 78px; padding: 0 15px; border: 0; border-radius: 7px; background: var(--blue); color: #fff; cursor: pointer; font: inherit; font-size: 14px; font-weight: 750; transition: background .18s ease; }
+        .search-button:hover { background: var(--blue-dark); }
+        .nav-link { margin-left: auto; color: var(--blue); font-size: 14px; font-weight: 750; }
+        .page { padding: 42px 0 88px; }
+        .breadcrumb { margin: 0 0 24px; color: var(--muted); font-size: 13px; }
+        .breadcrumb span { padding: 0 8px; color: #a8b3c1; }
+        .results-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 0 0 22px; border-bottom: 1px solid #dbe3ed; }
+        h1 { margin: 0; font-size: 29px; line-height: 1.35; overflow-wrap: anywhere; }
+        .keyword { color: var(--blue); }
+        .result-count { flex: 0 0 auto; padding-bottom: 4px; color: var(--muted); font-size: 14px; }
+        .result-count strong { color: var(--ink); font-weight: 750; }
+        .result-list { margin-top: 18px; background: var(--white); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+        .result-card { display: grid; grid-template-columns: 50px minmax(0, 1fr) 125px; align-items: center; gap: 20px; min-height: 142px; padding: 25px 28px; border-bottom: 1px solid var(--line); animation: rise-in .4s ease both; }
+        .result-card:last-child { border-bottom: 0; }
+        .result-number { align-self: start; padding-top: 3px; color: #9aa6b6; font-size: 13px; font-variant-numeric: tabular-nums; }
+        .company { margin: 0 0 9px; color: #5d6d83; font-size: 13px; font-weight: 700; }
+        .job-title { display: inline-block; font-size: 18px; line-height: 1.5; font-weight: 750; overflow-wrap: anywhere; transition: color .16s ease; }
+        .job-title:hover { color: var(--blue); }
+        .job-location { display: flex; align-items: center; gap: 7px; margin-top: 13px; color: var(--muted); font-size: 13px; }
+        .location-dot { width: 7px; height: 7px; border: 2px solid #8e9bad; border-radius: 50%; }
+        .detail-link { justify-self: end; padding: 10px 13px; border: 1px solid #cfe0f7; border-radius: 7px; color: var(--blue); font-size: 13px; font-weight: 750; transition: background .18s ease, border-color .18s ease; }
+        .detail-link:hover { border-color: var(--blue); background: #f1f6ff; }
+        .empty-state { padding: 76px 24px; text-align: center; }
+        .empty-symbol { display: grid; width: 48px; height: 48px; place-items: center; margin: 0 auto 17px; border-radius: 15px; background: #e8f0fd; color: var(--blue); font-size: 22px; font-weight: 700; }
+        .empty-state h2 { margin: 0; font-size: 19px; }
+        .empty-state p { margin: 9px 0 22px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+        .back-link { display: inline-flex; align-items: center; min-height: 40px; padding: 0 15px; border-radius: 7px; background: var(--blue); color: #fff; font-size: 14px; font-weight: 700; }
+        .back-link:hover { background: var(--blue-dark); }
+        .footer-note { margin-top: 15px; color: #8794a5; font-size: 12px; }
+        @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 700px) {
+            .header-inner, .page { width: min(100% - 32px, 1120px); }
+            .header-inner { min-height: 68px; flex-wrap: wrap; gap: 12px; padding: 12px 0; }
+            .brand { font-size: 19px; }
+            .search-form { order: 3; flex-basis: 100%; max-width: none; }
+            .nav-link { font-size: 13px; }
+            .page { padding-top: 28px; }
+            .breadcrumb { margin-bottom: 18px; }
+            .results-heading { align-items: flex-start; flex-direction: column; gap: 8px; padding-bottom: 17px; }
+            h1 { font-size: 25px; }
+            .result-count { padding: 0; }
+            .result-list { margin-top: 13px; }
+            .result-card { grid-template-columns: 28px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 21px 16px; }
+            .result-number { grid-row: 1; }
+            .result-main { grid-column: 2; }
+            .detail-link { grid-column: 2; justify-self: start; margin-top: 1px; }
+            .job-title { font-size: 16px; }
+            .empty-state { padding: 58px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topline" aria-hidden="true"></div>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="/" aria-label="잡서치 홈"><span class="brand-mark" aria-hidden="true">J</span><span>잡서치</span></a>
+            <form class="search-form" action="/search" method="get" role="search">
+                <input type="search" name="keyword" value="{{ keyword }}" placeholder="직무, 회사, 기술 키워드 검색" aria-label="검색어" required>
+                <button class="search-button" type="submit">검색</button>
+            </form>
+            <a class="nav-link" href="/">새 검색</a>
+        </div>
+    </header>
+    <main class="page">
+        <p class="breadcrumb"><a href="/">홈</a><span aria-hidden="true">/</span>채용정보 검색</p>
+        <section aria-labelledby="results-title">
+            {% set results = jobs|list %}
+            <div class="results-heading">
+                <h1 id="results-title"><span class="keyword">{{ keyword }}</span> 채용정보</h1>
+                <p class="result-count">검색 결과 <strong>{{ results|length }}</strong>건</p>
+            </div>
+            {% if results %}
+            <div class="result-list" aria-label="채용 공고 목록">
+                {% for index, job in results %}
+                <article class="result-card" style="animation-delay: {{ [loop.index0 * 45, 270]|min }}ms">
+                    <span class="result-number">{{ "%02d"|format(index + 1) }}</span>
+                    <div class="result-main">
+                        <p class="company">{{ job["company"] }}</p>
+                        <a class="job-title" href="{{ job['link'] }}" target="_blank" rel="noopener noreferrer">{{ job["title"] }}</a>
+                        <div class="job-location"><span class="location-dot" aria-hidden="true"></span>{{ job["location"] }}</div>
+                    </div>
+                    <a class="detail-link" href="{{ job['link'] }}" target="_blank" rel="noopener noreferrer">공고 상세 보기 <span aria-hidden="true">↗</span></a>
+                </article>
+                {% endfor %}
+            </div>
+            <p class="footer-note">검색 결과는 인크루트 채용 정보에서 제공됩니다.</p>
+            {% else %}
+            <div class="result-list empty-state">
+                <span class="empty-symbol" aria-hidden="true">?</span>
+                <h2>검색 결과가 없습니다.</h2>
+                <p>다른 키워드로 다시 검색해보세요.</p>
+                <a class="back-link" href="/">검색어 바꾸기</a>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</body>
 </html>

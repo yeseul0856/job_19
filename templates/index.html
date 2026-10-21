@@ -1,17 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="theme-color" content="#f5f8fc">
+    <title>잡서치 | 채용 검색</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #172b4d;
+            --muted: #68778d;
+            --line: #e3e9f1;
+            --blue: #1769e0;
+            --blue-dark: #0e51b8;
+            --canvas: #f5f8fc;
+            --white: #fff;
+            --mint: #d9f5e8;
+            --coral: #ff8068;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--canvas);
+            color: var(--ink);
+            font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        .topline { height: 5px; background: linear-gradient(90deg, var(--blue) 0 72%, #75d7b0 72% 91%, var(--coral) 91%); }
+        .site-header { height: 76px; background: rgba(255, 255, 255, .94); border-bottom: 1px solid var(--line); }
+        .header-inner, .page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; }
+        .header-inner { height: 100%; display: flex; align-items: center; gap: 42px; }
+        .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 850; }
+        .brand-mark { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 10px; background: var(--blue); color: #fff; font-size: 17px; font-weight: 800; }
+        .nav-link { color: var(--blue); font-size: 14px; font-weight: 750; }
+        .page { padding: 82px 0 100px; }
+        .intro { max-width: 690px; margin: 0 auto; text-align: center; animation: rise-in .55s ease both; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--blue); font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        .eyebrow::before { width: 7px; height: 7px; border-radius: 50%; background: #49bd88; content: ""; }
+        h1 { margin: 20px 0 12px; font-size: clamp(36px, 5vw, 54px); line-height: 1.22; }
+        .subtitle { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.7; }
+        .search-form { display: flex; gap: 10px; margin: 34px auto 0; padding: 8px; max-width: 680px; background: var(--white); border: 1px solid #d9e1ec; border-radius: 13px; box-shadow: 0 12px 32px rgba(35, 65, 108, .09); }
+        .search-field { display: flex; flex: 1; align-items: center; gap: 13px; min-width: 0; padding: 0 14px; }
+        .search-icon { position: relative; flex: 0 0 17px; width: 17px; height: 17px; border: 2px solid #8493a8; border-radius: 50%; }
+        .search-icon::after { position: absolute; right: -5px; bottom: -3px; width: 7px; height: 2px; background: #8493a8; transform: rotate(45deg); content: ""; }
+        input[type="search"] { width: 100%; min-width: 0; height: 46px; border: 0; outline: 0; color: var(--ink); background: transparent; font: inherit; font-size: 16px; }
+        input[type="search"]::placeholder { color: #98a3b3; }
+        .search-button { min-width: 112px; height: 48px; border: 0; border-radius: 9px; background: var(--blue); color: #fff; cursor: pointer; font: inherit; font-size: 15px; font-weight: 750; transition: background .18s ease, transform .18s ease; }
+        .search-button:hover { background: var(--blue-dark); transform: translateY(-1px); }
+        .search-button:focus-visible, input:focus-visible, .quick-link:focus-visible, .nav-link:focus-visible { outline: 3px solid rgba(23, 105, 224, .35); outline-offset: 3px; }
+        .quick-search { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 19px; color: var(--muted); font-size: 13px; }
+        .quick-link { padding: 7px 12px; border: 1px solid #e1e7ef; border-radius: 999px; background: rgba(255,255,255,.76); color: #41536d; font-weight: 650; transition: border-color .18s ease, color .18s ease; }
+        .quick-link:hover { border-color: #9dbce9; color: var(--blue); }
+        .search-note { display: flex; justify-content: center; align-items: center; gap: 9px; margin: 67px auto 0; color: #617187; font-size: 13px; }
+        .note-mark { display: grid; width: 25px; height: 25px; place-items: center; border-radius: 8px; background: var(--mint); color: #25855b; font-size: 13px; font-weight: 800; }
+        @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .site-header { height: 66px; }
+            .header-inner, .page { width: min(100% - 32px, 1120px); }
+            .header-inner { justify-content: space-between; }
+            .page { padding-top: 64px; }
+            h1 { font-size: 38px; }
+            .subtitle { font-size: 14px; }
+            .search-form { gap: 4px; margin-top: 28px; padding: 6px; }
+            .search-field { gap: 10px; padding: 0 9px; }
+            .search-button { min-width: 78px; padding: 0 12px; font-size: 14px; }
+            input[type="search"] { font-size: 15px; }
+            .quick-search { gap: 7px; }
+            .search-note { margin-top: 54px; font-size: 12px; }
+        }
+    </style>
 </head>
 <body>
-    <h1>안녕하세요 잡스크래퍼입니다.</h1>
-    <form action="/search">
-        <input type="text" name="keyword" />
-        <button>검색하기</button>
-    </form>
-    <!-- 폼이 검색하기 버튼을 누르면 /search 주소로 보내라 -->
-    
+    <div class="topline" aria-hidden="true"></div>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="/" aria-label="잡서치 홈"><span class="brand-mark" aria-hidden="true">J</span><span>잡서치</span></a>
+            <a class="nav-link" href="/">채용 검색</a>
+        </div>
+    </header>
+    <main class="page">
+        <section class="intro" aria-labelledby="page-title">
+            <span class="eyebrow">Find your next move</span>
+            <h1 id="page-title">다음 커리어를<br>찾아보세요.</h1>
+            <p class="subtitle">관심 있는 직무나 기술을 검색하고, 새로운 기회를 만나보세요.</p>
+            <form class="search-form" action="/search" method="get" role="search">
+                <label class="search-field">
+                    <span class="search-icon" aria-hidden="true"></span>
+                    <input type="search" name="keyword" placeholder="직무, 회사, 기술 키워드 검색" aria-label="검색어" required>
+                </label>
+                <button class="search-button" type="submit">공고 찾기</button>
+            </form>
+            <nav class="quick-search" aria-label="추천 검색어">
+                <span>인기 검색</span>
+                <a class="quick-link" href="/search?keyword=Python">Python</a>
+                <a class="quick-link" href="/search?keyword=데이터">데이터</a>
+                <a class="quick-link" href="/search?keyword=마케팅">마케팅</a>
+                <a class="quick-link" href="/search?keyword=신입">신입</a>
+            </nav>
+        </section>
+        <p class="search-note"><span class="note-mark" aria-hidden="true">↗</span>인크루트 채용 정보를 한 곳에서 검색해보세요.</p>
+    </main>
 </body>
 </html>
