@@ -6,12 +6,11 @@ from bs4 import BeautifulSoup
 # from 모듈(패키지) import 함수/클래스/변수 
 # BeautifulSoup은 HTML 코드를 분석하기 쉬운 형태로 변환
 
-keyword = "파이썬"
-pages = 5
-jobs = []
 
-def search_incruit():
 
+def search_incruit(keyword, pages=1):
+    #keyword는 함수 안에서 쓸수있는 매개변수
+    jobs = []
     for i in range(pages): 
         page = i * 30
 
